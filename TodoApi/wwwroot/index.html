@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        table {
+            border-collapse: collapse;
+            border: 1px solid#000000;
+        }
+        tr {
+            border-bottom: 1px solid#000000;
+        }
+        td {
+            word-wrap: break-word;
+            width: 350px;
+            text-align: center
+        }
+        th {
+            word-wrap: break-word;
+            width: 350px;
+        }
+    </style>
+    <meta charset="utf-8"/>
+    <title>Book Search</title>
+</head>
+<body>
+
+<form>
+    <input type="radio" name="searchOption" value="title" checked>Title<br/>
+    <input type="radio" name="searchOption" value="author">Author<br/>
+    <input type="radio" name="searchOption" value="genre">Genre<br/>
+</form>
+
+<input id="searchWord" placeholder="Search...">
+
+<button type="button" onclick=search()>Submit</button>
+
+<button onclick=getAll()>All</button>
+
+<table>
+    <tr>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Price</th>
+        <th>Genre</th>
+        <th>Publish Date</th>
+        <th>Description</th>
+    </tr>
+</table>
+
+<div id="table" style="width: 100%"></div>
+
+</body>
+</html>
+
+
+
+<script>
+    var url = "https://localhost";
+    var port = "5001";
+    var http = new XMLHttpRequest();
+
+    var totalColumns = 6;
+
+    var items = ["title", "author", "price", "genre", "publishDate", "description"];
+    
+
+    function createTable(objectList) {
+        var tableDiv = document.getElementById("table");
+        tableDiv.innerHTML = "";
+        var table = document.createElement("table");
+        objectList.forEach(node => {
+            var row = document.createElement("tr");
+
+            for (var j = 0; j < totalColumns; j++) {
+                var cell = document.createElement("td");
+                var cellText = document.createTextNode(node[items[j]]);
+                cell.appendChild(cellText);
+                row.appendChild(cell);
+            }
+            table.appendChild(row);
+        });
+        tableDiv.appendChild(table);
+
+    }
+
+    function getAll() {
+        http.open('GET', url + ":" + port + "/" + "api/book");
+
+        http.onload = function() {
+            var data = JSON.parse(this.response);
+            if (http.status >= 200 && http.status < 400) {
+                createTable(data);
+
+            }
+        }
+        http.send();
+    }
+
+    function search() {
+        var searchString = document.getElementById("searchWord").value;
+        
+        var searchOption = document.querySelector('input[name=searchOption]:checked').value;
+        
+        http.open('GET', url + ":" + port + "/" + "api/book/search?"+ searchOption + "=" + searchString);
+
+        http.onload = function () {
+            var data = JSON.parse(this.response);
+            if (http.status >= 200 && http.status < 400) {
+                createTable(data);
+
+            }
+        }
+        http.send();
+        
+    }
+
+</script>
